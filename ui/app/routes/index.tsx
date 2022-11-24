@@ -97,13 +97,6 @@ export default function Index() {
     );
   }
 
-  function playGame(playerName: string, pickedNumber: number) {
-    const actualNumber = getRandomInt(numbers[0], numbers[numbers.length - 1]);
-    const wonGame = pickedNumber === actualNumber;
-    updateLeaderboard(playerName, wonGame);
-    setLastGameResult({ playerName, pickedNumber, actualNumber, wonGame });
-  }
-
   function renderLeaderboard() {
     if (!Object.keys(leaderboard).length) {
       return <Typography variant="body1">No games played yet</Typography>;
@@ -138,6 +131,16 @@ export default function Index() {
         </TableBody>
       </Table>
     );
+  }
+
+  // 1. Figure out how to get a random number and see if the player picked that number
+  //    HINT: I made a helper function called getRandomInt
+  // 2. Update the leaderboard based on the result of the game
+  //    HINT: I made a helper function called updateLeaderboard
+  // 3. Set the last game result so the player knows if they won or not
+  //    HINT: I made a helper function called setLastGameResult
+  function playGame(playerName: string, pickedNumber: number) {
+    console.info("Where the magic happens");
   }
 
   return (
