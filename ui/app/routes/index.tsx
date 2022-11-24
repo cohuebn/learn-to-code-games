@@ -1,8 +1,12 @@
 import { useState } from "react";
-import { Leaderboard, PlayArrow } from "@mui/icons-material";
+import {
+  Celebration,
+  Clear,
+  Leaderboard,
+  PlayArrow,
+} from "@mui/icons-material";
 import {
   AppBar,
-  Avatar,
   Box,
   Button,
   ButtonGroup,
@@ -10,26 +14,27 @@ import {
   FormControl,
   FormControlLabel,
   FormLabel,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Radio,
   RadioGroup,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
   TextField,
   Toolbar,
   Typography,
 } from "@mui/material";
 import { Container } from "@mui/system";
+import range from "just-range";
 import learningDolphin from "~/images/learning-dolphin.png";
 
 export default function Index() {
-  const numbers = [1, 2, 3];
+  const numbers = range(1, 5);
   const componentSize = numbers.length > 8 ? "md" : "sm";
   const [name, setName] = useState("");
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
-  const [lastGameResult, setLastGameResult] = useState<string | null>(null);
   type PlayerResults = {
     name: string;
     wins: number;
@@ -37,6 +42,15 @@ export default function Index() {
   };
   const [leaderboard, setLeaderboard] = useState<Record<string, PlayerResults>>(
     {}
+  );
+  type LastGameResult = {
+    playerName: string;
+    pickedNumber: number;
+    actualNumber: number;
+    wonGame: boolean;
+  };
+  const [lastGameResult, setLastGameResult] = useState<LastGameResult | null>(
+    null
   );
 
   function getRandomInt(min: number, max: number): number {
@@ -56,35 +70,73 @@ export default function Index() {
           wins: currentPlayerEntry.wins + winIncrement,
         }
       : { name: playerName, gamesPlayed: 1, wins: winIncrement };
-    const updateLeaderboard = {
+    const updatedLeaderboard = {
       ...leaderboard,
-      playerName: updatedPlayerEntry,
+      [playerName]: updatedPlayerEntry,
     };
-    setLeaderboard(updateLeaderboard);
+    console.info(updatedLeaderboard);
+    setLeaderboard(updatedLeaderboard);
+  }
+
+  function renderLastGameResult() {
+    if (!lastGameResult) {
+      return (
+        <Typography variant="body1">No games have been played yet</Typography>
+      );
+    }
+    const gameText = `${lastGameResult.playerName} picked ${lastGameResult.pickedNumber} and the answer was ${lastGameResult.actualNumber}.`;
+    const gameIcon = lastGameResult?.wonGame ? (
+      <Celebration sx={{ verticalAlign: "text-bottom", marginRight: 1 }} />
+    ) : (
+      <Clear sx={{ verticalAlign: "text-bottom", marginRight: 1 }} />
+    );
+    return (
+      <Typography variant="body1">
+        {gameIcon} {gameText}
+      </Typography>
+    );
   }
 
   function playGame(playerName: string, pickedNumber: number) {
-    console.info(`Playing game with ${playerName} who picked ${pickedNumber}`);
+    const actualNumber = getRandomInt(numbers[0], numbers[numbers.length - 1]);
+    const wonGame = pickedNumber === actualNumber;
+    updateLeaderboard(playerName, wonGame);
+    setLastGameResult({ playerName, pickedNumber, actualNumber, wonGame });
   }
 
-  function getLeaderboardElement() {
-    return leaderboard.length ? (
-      <List>
-        {leaderboard.map((leaderboardPartipant) => {
-          return (
-            <ListItem key={leaderboardPartipant.name}>
-              <ListItemAvatar>
-                <Avatar alt={leaderboardPartipant.name}>
-                  {leaderboardPartipant.name.substring(0, 1)}
-                </Avatar>
-                <ListItemText>{leaderboardPartipant.name}</ListItemText>
-              </ListItemAvatar>
-            </ListItem>
-          );
-        })}
-      </List>
-    ) : (
-      <Typography variant="body1">No games played yet</Typography>
+  function renderLeaderboard() {
+    if (!Object.keys(leaderboard).length) {
+      return <Typography variant="body1">No games played yet</Typography>;
+    }
+
+    const sortedLeaderboard = [...Object.values(leaderboard)].sort(
+      (a, b) => b.wins - a.wins
+    );
+    return (
+      <Table>
+        <TableHead>
+          <TableCell>Player</TableCell>
+          <TableCell align="right">Wins</TableCell>
+          <TableCell align="right">Games played</TableCell>
+          <TableCell align="right">Win %</TableCell>
+        </TableHead>
+        <TableBody>
+          {sortedLeaderboard.map((playerResults) => {
+            return (
+              <TableRow key={playerResults.name}>
+                <TableCell>{playerResults.name}</TableCell>
+                <TableCell align="right">{playerResults.wins}</TableCell>
+                <TableCell align="right">{playerResults.gamesPlayed}</TableCell>
+                <TableCell align="right">
+                  {Math.floor(
+                    (playerResults.wins / playerResults.gamesPlayed) * 100
+                  )}
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
     );
   }
 
@@ -137,11 +189,14 @@ export default function Index() {
             <Button
               variant="contained"
               disabled={!name || !selectedNumber}
-              onClick={(e) => playGame(name, selectedNumber as number)}
+              onClick={(_) => playGame(name, selectedNumber as number)}
             >
               <PlayArrow /> Play
             </Button>
           </ButtonGroup>
+          <Divider />
+          <Typography variant="h6">Last game result</Typography>
+          {renderLastGameResult()}
           <Divider />
           <Typography variant="h6">
             <Leaderboard
@@ -149,7 +204,7 @@ export default function Index() {
             />
             Leaderboard
           </Typography>
-          {getLeaderboardElement()}
+          {renderLeaderboard()}
         </Stack>
       </Container>
     </Box>
