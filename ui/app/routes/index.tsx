@@ -53,7 +53,9 @@ export default function Index() {
     null
   );
 
-  function getRandomInt(min: number, max: number): number {
+  function getRandomInt(): number {
+    const min = numbers[0];
+    const max = numbers[numbers.length - 1];
     const randomMin = Math.ceil(min);
     return Math.floor(
       Math.random() * (Math.floor(max) - randomMin + 1) + randomMin
