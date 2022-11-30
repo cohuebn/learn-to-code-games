@@ -31,7 +31,7 @@ import range from "just-range";
 import learningDolphin from "~/images/learning-dolphin.png";
 
 export default function Index() {
-  const numbers = range(1, 5);
+  const numbers = range(1, 6);
   const componentSize = numbers.length > 8 ? "md" : "sm";
   const [name, setName] = useState("");
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
@@ -142,7 +142,8 @@ export default function Index() {
   // 3. Set the last game result so the player knows if they won or not
   //    HINT: I made a helper function called setLastGameResult
   function playGame(playerName: string, pickedNumber: number) {
-    console.info("Where the magic happens");
+    const winningNumber = getRandomInt();
+    console.info(winningNumber);
   }
 
   return (
